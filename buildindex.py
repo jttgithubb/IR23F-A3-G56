@@ -4,6 +4,7 @@ import os
 import json
 import nltk
 from nltk import word_tokenize
+from nltk.stem import PorterStemmer
 from bs4 import BeautifulSoup
 from utils import *
 nltk.download('punkt')
@@ -14,6 +15,7 @@ def create_index():
     inverted_index = {}
     index_size = 0
     index_fileCount = 0
+    porter = PorterStemmer() 
 
     # Variables for logging analytics
     unique_wordsSet = set()
@@ -46,7 +48,8 @@ def create_index():
                         content_soup = BeautifulSoup(content, 'lxml')
                         content_text = content_soup.get_text()
                         tokens = word_tokenize(content_text)
-                        token_freqDict = computeWordFrequencies(tokens)
+                        stemmed_tokens = [porter.stem(token) for token in tokens]
+                        token_freqDict = computeWordFrequencies(stemmed_tokens)
                         for term, freq in token_freqDict.items():
                             inverted_index.setdefault(term, list())
                             posting = (doc_id, freq)
