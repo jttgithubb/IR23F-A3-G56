@@ -64,6 +64,10 @@ def create_index():
         inverted_index.clear()
         index_size = 0
     
+    # Display index analytics
+    index_folder_path = os.getcwd() + '\indexes'
+    printAnalytics(unique_wordsSet, indexed_docCount, index_folder_path)
+    
 
 if __name__ == "__main__":
     create_index()
