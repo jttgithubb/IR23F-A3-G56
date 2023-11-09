@@ -31,8 +31,8 @@ def create_index():
                 if (os.path.isfile(file_path)):
                     if (index_size >= 20000):
                         index_fileCount += 1
-                        index_file_path = os.getcwd() + '\indexes\index' + str(index_fileCount) + '.json'
-                        with open(index_file_path, 'w') as i_file:
+                        index_file = 'index' + str(index_fileCount) + '.json'
+                        with open(index_file, 'w') as i_file:
                             json.dump(inverted_index, i_file)
                             inverted_index.clear()
                             index_size = 0
@@ -58,14 +58,14 @@ def create_index():
                         indexed_docCount += 1
 
     index_fileCount += 1
-    index_file_path = os.getcwd() + '\indexes\index' + str(index_fileCount) + '.json'
-    with open(index_file_path, 'w') as i_file:
+    index_file = 'index' + str(index_fileCount) + '.json'
+    with open(index_file, 'w') as i_file:
         json.dump(inverted_index, i_file)
         inverted_index.clear()
         index_size = 0
     
     # Display index analytics
-    index_folder_path = os.getcwd() + '\indexes'
+    index_folder_path = os.getcwd()
     printAnalytics(unique_wordsSet, indexed_docCount, index_folder_path)
     
 
