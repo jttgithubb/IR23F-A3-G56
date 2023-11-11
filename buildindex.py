@@ -48,8 +48,8 @@ def create_index():
                         content_soup = BeautifulSoup(content, 'lxml')
                         content_text = content_soup.get_text()
                         tokens = word_tokenize(content_text)
-                        stemmed_tokens = [porter.stem(token) for token in tokens]
-                        token_freqDict = computeWordFrequencies(stemmed_tokens)
+                        #stemmed_tokens = [porter.stem(token) for token in tokens]
+                        token_freqDict = computeWordFrequencies(tokens)
                         for term, freq in token_freqDict.items():
                             inverted_index.setdefault(term, list())
                             posting = (doc_id, freq)
