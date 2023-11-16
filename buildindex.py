@@ -15,7 +15,9 @@ def create_index():
     inverted_index = {}
     index_size = 0
     index_fileCount = 0
-    porter = PorterStemmer() 
+    porter = PorterStemmer()
+    docid_urlMap = {} 
+    
 
     # Variables for logging analytics
     unique_wordsSet = set()
@@ -33,11 +35,21 @@ def create_index():
                 if (os.path.isfile(file_path)):
                     if (index_size >= 20000):
                         index_fileCount += 1
-                        index_file = 'index' + str(index_fileCount) + '.json'
+                        index_file = 'index' + str(index_fileCount) + '.txt'
+                        ioi_file = 'index' + str(index_fileCount) + '.json'
+                        indexOfIndex = {}
                         with open(index_file, 'w') as i_file:
-                            json.dump(inverted_index, i_file)
+                            for term,pl in inverted_index.items():
+                                doc_freq = len(pl)
+                                pl = sorted(pl, key=lambda x: x[0])
+                                line = f"{term}: {doc_freq}: {pl}\n"
+                                current_byte = i_file.tell()
+                                indexOfIndex[term] = current_byte
+                                i_file.write(line)
                             inverted_index.clear()
                             index_size = 0
+                        with open(ioi_file, 'w') as i2_file:
+                            json.dump(indexOfIndex, i2_file)
 
                     with open(file_path, 'r') as open_file:
                         json_data = json.load(open_file)
@@ -45,11 +57,12 @@ def create_index():
                         content = json_data['content']
                         #encoding = json_data['encoding']
                         doc_id = get_urlhash(url)
+                        docid_urlMap[doc_id] = url
                         content_soup = BeautifulSoup(content, 'lxml')
                         content_text = content_soup.get_text()
                         tokens = word_tokenize(content_text)
-                        #stemmed_tokens = [porter.stem(token) for token in tokens]
-                        token_freqDict = computeWordFrequencies(tokens)
+                        stemmed_tokens = [porter.stem(token) for token in tokens]
+                        token_freqDict = computeWordFrequencies(stemmed_tokens)
                         for term, freq in token_freqDict.items():
                             inverted_index.setdefault(term, list())
                             posting = (doc_id, freq)
@@ -61,16 +74,31 @@ def create_index():
                         indexed_docCount += 1
 
     index_fileCount += 1
-    index_file = 'index' + str(index_fileCount) + '.json'
+    index_file = 'index' + str(index_fileCount) + '.txt'
+    ioi_file = 'index' + str(index_fileCount) + '.json'
+    indexOfIndex = {}
     with open(index_file, 'w') as i_file:
-        json.dump(inverted_index, i_file)
+        for term,pl in inverted_index.items():
+            doc_freq = len(pl)
+            pl = sorted(pl, key=lambda x: x[0])
+            line = f"{term}: {doc_freq}: {pl}\n"
+            current_byte = i_file.tell()
+            indexOfIndex[term] = current_byte
+            i_file.write(line)
         inverted_index.clear()
         index_size = 0
+    with open(ioi_file, 'w') as i2_file:
+        json.dump(indexOfIndex, i2_file)
     
     # Display index analytics
     index_folder_path = os.getcwd()
     printAnalytics(unique_wordsSet, indexed_docCount, index_folder_path)
+
+    # Create the .json map for docid:url
+    with open('id_url.json', 'w') as mapfile:
+        json.dump(docid_urlMap, mapfile)
     
+    # Produced 3 index .txt files, 3 .json files for indexing .txt files, and 1 .json for mapping id to url
 
 if __name__ == "__main__":
     create_index()
