@@ -3,7 +3,6 @@
 import os
 import json
 import nltk
-from nltk import word_tokenize
 from nltk.stem import PorterStemmer
 from bs4 import BeautifulSoup
 from utils import *
@@ -38,7 +37,7 @@ def create_index():
                         index_file = 'index' + str(index_fileCount) + '.txt'
                         ioi_file = 'index' + str(index_fileCount) + '.json'
                         indexOfIndex = {}
-                        with open(index_file, 'w') as i_file:
+                        with open(index_file, 'w', encoding= 'utf-8') as i_file:
                             for term,pl in inverted_index.items():
                                 doc_freq = len(pl)
                                 pl = sorted(pl, key=lambda x: x[0])
@@ -55,12 +54,14 @@ def create_index():
                         json_data = json.load(open_file)
                         url = json_data['url']
                         content = json_data['content']
-                        #encoding = json_data['encoding']
-                        doc_id = get_urlhash(url)
+                        encoding = json_data['encoding']
+                        content_bytes = content.encode(encoding, errors= 'replace')
+                        content_str = content_bytes.decode(encoding, errors= 'replace')
+                        doc_id = indexed_docCount
                         docid_urlMap[doc_id] = url
-                        content_soup = BeautifulSoup(content, 'lxml')
+                        content_soup = BeautifulSoup(content_str, 'html.parser')
                         content_text = content_soup.get_text()
-                        tokens = word_tokenize(content_text)
+                        tokens = tokenize(content_text)
                         stemmed_tokens = [porter.stem(token) for token in tokens]
                         token_freqDict = computeWordFrequencies(stemmed_tokens)
                         for term, freq in token_freqDict.items():
@@ -77,7 +78,7 @@ def create_index():
     index_file = 'index' + str(index_fileCount) + '.txt'
     ioi_file = 'index' + str(index_fileCount) + '.json'
     indexOfIndex = {}
-    with open(index_file, 'w') as i_file:
+    with open(index_file, 'w', encoding= 'utf-8') as i_file:
         for term,pl in inverted_index.items():
             doc_freq = len(pl)
             pl = sorted(pl, key=lambda x: x[0])

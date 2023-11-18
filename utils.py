@@ -1,6 +1,7 @@
 import os
 from hashlib import sha256
 from urllib.parse import urlparse
+import sys
 
 
 def get_urlhash(url):
@@ -8,6 +9,27 @@ def get_urlhash(url):
     return sha256(
         f"{parsed.netloc}/{parsed.path}/{parsed.params}/"
         f"{parsed.query}/{parsed.fragment}".encode("utf-8")).hexdigest()
+
+def tokenize(text):
+    allTokensList = []
+    try:
+        for line in text.splitlines():
+            lineString = line.strip()
+            for character in lineString:
+                if (not character.isalnum()):
+                    lineString = lineString.replace(character, " ")
+            lineString = lineString.lower()
+            for word in lineString.split():
+                allTokensList.append(word)
+
+        return allTokensList    
+           
+    except OSError:
+        print("Could not open/read file.")
+        sys.exit(1)
+    except Exception:
+        print("Unexpected error occurred while parsing file.")
+        sys.exit(1)
 
 def computeWordFrequencies(tokenList):
     wordFreqDict = {}
