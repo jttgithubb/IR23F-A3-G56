@@ -21,6 +21,7 @@ def tokenize(text):
             lineString = lineString.lower()
             for word in lineString.split():
                 allTokensList.append(word)
+        
 
         return allTokensList    
            

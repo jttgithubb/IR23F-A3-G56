@@ -1,0 +1,32 @@
+Search Engine Evaluation 
+
+Intially, I had only implemented a rank retrieval system that was able to score and compare documents based on their tf-idf weights. At this point,
+any document from a query term's entire postings list was a contender for the search results. This basic scoring mechanism proved to be very inefficient
+for queries with more than 2 terms. One or two term queries were manageable at this point. In order to address this inefficiency, I reduced the amount
+contenders for each query term by only considering high-idf terms and implementing champion lists which comprised of the top 20 percent of postings for 
+a term with the highest weight. By separating my index into a high and low tier, I reduce the amount of contenders and cosine score computations significantly 
+per query. By this point, query computations were quite fast but effective search results were lacking. As a result, I decided to improve my scoring function 
+by adding more weights such as a term's frequency in the title of a document. Thus, I was able to produce search results that were more relevant to the user 
+in a timely manner.
+
+20 Queries Used
+1. intelligent
+2. computer
+3. apple
+4. engineering
+5. retrieval
+6. computer science
+7. data science
+8. machine learning
+9. research opportunities
+10. graduation requirements
+11. school of ics
+12. computer system architectures
+13. undergraduate ics majors at uci
+14. informatics courses
+15. computer science engineering
+16. computer science major requirements
+17. masters programs in ics
+18. Where is the school of ics?
+19. How to apply for masters program?
+20. What are the requirements of the computer science major?

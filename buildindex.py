@@ -3,6 +3,7 @@
 import os
 import json
 import nltk
+import bs4
 from nltk.stem import PorterStemmer
 from bs4 import BeautifulSoup
 from utils import *
@@ -60,13 +61,50 @@ def create_index():
                         doc_id = indexed_docCount
                         docid_urlMap[doc_id] = url
                         content_soup = BeautifulSoup(content_str, 'html.parser')
-                        content_text = content_soup.get_text()
-                        tokens = tokenize(content_text)
-                        stemmed_tokens = [porter.stem(token) for token in tokens]
-                        token_freqDict = computeWordFrequencies(stemmed_tokens)
+                        posDict = {}
+                        wordPos = 0
+                        titlePosList = []
+                        allTokens = []
+                        for tag in content_soup.find_all(True):
+                            if tag.name == 'title':
+                                tag_str = " ".join([t for t in tag.contents if isinstance(t, bs4.element.NavigableString)])
+                                if tag_str != "":
+                                    tokens = tokenize(tag_str)
+                                    stemmed_tokens = [porter.stem(token) for token in tokens]
+                                    if len(stemmed_tokens) > 0:
+                                        start = 0
+                                        end = 0
+                                        for i in range(len(stemmed_tokens)):
+                                            posDict.setdefault(stemmed_tokens[i], list())
+                                            posDict[stemmed_tokens[i]].append(wordPos)
+                                            if i == 0:
+                                                start = wordPos
+                                            if i == len(stemmed_tokens)-1:
+                                                end = wordPos
+                                            wordPos += 1
+                                            allTokens.append(stemmed_tokens[i])
+                                        tpos = (start, end)
+                                        titlePosList.append(tpos)
+                                            
+                                else:
+                                    continue
+                            else:
+                                tag_str = " ".join([t for t in tag.contents if isinstance(t, bs4.element.NavigableString)])
+                                if tag_str != "":
+                                    tokens = tokenize(tag_str)
+                                    stemmed_tokens = [porter.stem(token) for token in tokens]
+                                    for t in stemmed_tokens:
+                                        posDict.setdefault(t, list())
+                                        posDict[t].append(wordPos)
+                                        wordPos += 1
+                                        allTokens.append(t)
+
+                                else:
+                                    continue
+                        token_freqDict = computeWordFrequencies(allTokens)
                         for term, freq in token_freqDict.items():
                             inverted_index.setdefault(term, list())
-                            posting = (doc_id, freq)
+                            posting = (doc_id, freq, tuple(posDict[term]), tuple(titlePosList))
                             inverted_index[term].append(posting)
                             # Logging
                             unique_wordsSet.add(term)
